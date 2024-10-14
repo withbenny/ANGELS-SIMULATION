@@ -2,7 +2,7 @@ import pandas as pd
 
 class ScoreCalculator:
     def apply_score(self, data):
-        classifier = Classify()
+        classifier = Classifier()
         data['a'] = data.apply(classifier.a_ability, axis=1)
         data['n'] = data.apply(classifier.n_care, axis=1)
         data['g'] = data.apply(classifier.g_economic, axis=1)
