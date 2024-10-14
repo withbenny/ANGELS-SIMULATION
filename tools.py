@@ -1,6 +1,23 @@
 import pandas as pd
 
 class ScoreCalculator:
+    def apply_score(self, data):
+        classifier = Classify()
+        data['a'] = data.apply(classifier.a_ability, axis=1)
+        data['n'] = data.apply(classifier.n_care, axis=1)
+        data['g'] = data.apply(classifier.g_economic, axis=1)
+        data['e'] = data.apply(classifier.e_housing, axis=1)
+        data['l'] = data.apply(classifier.l_living, axis=1)
+        data['s'] = data.apply(classifier.s_safety, axis=1)
+        data['score'] = data['a'] + data['n'] + data['g'] + data['e'] + data['l'] + data['s']
+
+        result = data[['person_sn', 'is_use_long_term_care', 'age', 'disability_lv', 'family_type', 'child_cnt',
+                       'is_living_same_county', 'low_type_cd', 'having_house_type', 'build_age', 'is_apartment',
+                       'bus', 'store', 'hospital', 'lique', 'score']]
+        print('Score calculation completed.')
+        return result
+
+class Classify:
     def __init__(self):
         self.wa1 = 5.9760 / 100
         self.wa2 = 10.5620 / 100
@@ -21,8 +38,9 @@ class ScoreCalculator:
         self.ws2 = 4.6387 / 100
         self.ws3 = 6.6674 / 100
     
-    def calculate_score(self, row):
-        score = 0
+    def a_ability(self, row):
+        a = 0
+
         # 年齡
         # a1 高齡者
         age = row['age']
@@ -59,6 +77,12 @@ class ScoreCalculator:
             a3 = 0
         else:
             raise ValueError(f'Invalid value for disability_lv: {d_lv}')
+
+        a = self.wa1*a1 + self.wa2*a2 + self.wa3*a3
+        return a
+    
+    def n_care(self, row):
+        n = 0
 
         # 家庭型態
         # 家庭型態
@@ -99,6 +123,12 @@ class ScoreCalculator:
         # 資料中沒有提供有無外傭照顧之長照者，因此此項目不計分
         # n3 無外傭照顧之長照者
         n3 = 0
+
+        n = self.wn1*n1 + self.wn2*n2 + self.wn3*n3
+        return n
+    
+    def g_economic(self, row):
+        g = 0
 
         # 低收或中低收入戶
         # 0-4: 低收入戶(數值愈低代表愈嚴重)
@@ -146,6 +176,11 @@ class ScoreCalculator:
         # g3 房價行情較低
         g3 = 0.5840
 
+        g = self.wg1*g1 + self.wg2*g2 + self.wg3*g3
+        return g
+    
+    def e_housing(self, row):
+        e = 0
         # 屋齡: int
         # e1 高屋齡
         build_age = row['build_age']
@@ -178,6 +213,12 @@ class ScoreCalculator:
         # 資料中沒有提供建築結構，因此此項按附表1計0.4147分
         # e3 非鋼骨或鋼筋混凝土結構
         e3 = 0.4147
+
+        e = self.we1*e1 + self.we2*e2 + self.we3*e3
+        return e
+    
+    def l_living(self, row):
+        l = 0
 
         # 與交通站牌距離
         # 數值愈高表示距離交通站牌愈遠，-1則為無法判斷。
@@ -230,6 +271,10 @@ class ScoreCalculator:
         else:
             raise ValueError(f'Invalid value for hospital: {hospital}')
         
+        l = self.wl1*l1 + self.wl2*l2 + self.wl3*l3
+        return l
+    
+    def s_safety(self, row):
         # 土壤液化區
         # 0: 建物非落在土壤液化區
         # 1: 建物落在低潛勢土壤液化區
@@ -255,13 +300,19 @@ class ScoreCalculator:
         s2 = 0
         s3 = 0
 
-        score = self.wa1*a1 + self.wa2*a2 + self.wa3*a3 + self.wn1*n1 + self.wn2*n2 + self.wn3*n3 + \
-                self.wg1*g1 + self.wg2*g2 + self.wg3*g3 + self.we1*e1 + self.we2*e2 + self.we3*e3 + \
-                self.wl1*l1 + self.wl2*l2 + self.wl3*l3 + self.ws1*s1 + self.ws2*s2 + self.ws3*s3
+        s = self.ws1*s1 + self.ws2*s2 + self.ws3*s3
+        return s
+    
+    def classifier(self, data):
+        data['a'] = data.apply(self.a_ability, axis=1)
+        data['n'] = data.apply(self.n_care, axis=1)
+        data['g'] = data.apply(self.g_economic, axis=1)
+        data['e'] = data.apply(self.e_housing, axis=1)
+        data['l'] = data.apply(self.l_living, axis=1)
+        data['s'] = data.apply(self.s_safety, axis=1)
+        data['score'] = data['a'] + data['n'] + data['g'] + data['e'] + data['l'] + data['s']
 
-        return score
-
-    def apply_score(self, data):
-        data['score'] = data.apply(self.calculate_score, axis=1)
-        print('Score calculation completed.')
-        return data
+        result = data[['person_sn', 'is_use_long_term_care',
+                       'a', 'n', 'g', 'e', 'l', 's', 'score']]
+        print('Classification completed.')
+        return result
