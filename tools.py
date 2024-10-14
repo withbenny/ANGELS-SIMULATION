@@ -17,7 +17,7 @@ class ScoreCalculator:
         print('Score calculation completed.')
         return result
 
-class Classify:
+class Classifier:
     def __init__(self):
         self.wa1 = 5.9760 / 100
         self.wa2 = 10.5620 / 100
@@ -303,7 +303,7 @@ class Classify:
         s = self.ws1*s1 + self.ws2*s2 + self.ws3*s3
         return s
     
-    def classifier(self, data):
+    def apply_class(self, data):
         data['a'] = data.apply(self.a_ability, axis=1)
         data['n'] = data.apply(self.n_care, axis=1)
         data['g'] = data.apply(self.g_economic, axis=1)
