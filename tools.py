@@ -3,17 +3,17 @@ import pandas as pd
 class ScoreCalculator:
     def apply_score(self, data):
         classifier = Classifier()
-        data['a'] = data.apply(classifier.a_ability, axis=1)
-        data['n'] = data.apply(classifier.n_care, axis=1)
-        data['g'] = data.apply(classifier.g_economic, axis=1)
-        data['e'] = data.apply(classifier.e_housing, axis=1)
-        data['l'] = data.apply(classifier.l_living, axis=1)
-        data['s'] = data.apply(classifier.s_safety, axis=1)
-        data['score'] = data['a'] + data['n'] + data['g'] + data['e'] + data['l'] + data['s']
+        data['action'] = data.apply(classifier.action, axis=1)
+        data['nurse'] = data.apply(classifier.nurse, axis=1)
+        data['gold'] = data.apply(classifier.gold, axis=1)
+        data['entity'] = data.apply(classifier.entity, axis=1)
+        data['liberty'] = data.apply(classifier.liberty, axis=1)
+        data['security'] = data.apply(classifier.security, axis=1)
+        data['overall'] = data['action'] + data['nurse'] + data['gold'] + data['entity'] + data['liberty'] + data['security']
 
         result = data[['person_sn', 'is_use_long_term_care', 'age', 'disability_lv', 'family_type', 'child_cnt',
                        'is_living_same_county', 'low_type_cd', 'having_house_type', 'build_age', 'is_apartment',
-                       'bus', 'store', 'hospital', 'lique', 'score']]
+                       'bus', 'store', 'hospital', 'lique', 'overall']]
         print('Score calculation completed.')
         return result
 
@@ -38,7 +38,7 @@ class Classifier:
         self.ws2 = 4.6387 / 100
         self.ws3 = 6.6674 / 100
     
-    def a_ability(self, row):
+    def action(self, row):
         a = 0
 
         # 年齡
@@ -81,7 +81,7 @@ class Classifier:
         a = self.wa1*a1 + self.wa2*a2 + self.wa3*a3
         return a
     
-    def n_care(self, row):
+    def nurse(self, row):
         n = 0
 
         # 家庭型態
@@ -127,7 +127,7 @@ class Classifier:
         n = self.wn1*n1 + self.wn2*n2 + self.wn3*n3
         return n
     
-    def g_economic(self, row):
+    def gold(self, row):
         g = 0
 
         # 低收或中低收入戶
@@ -179,7 +179,7 @@ class Classifier:
         g = self.wg1*g1 + self.wg2*g2 + self.wg3*g3
         return g
     
-    def e_housing(self, row):
+    def entity(self, row):
         e = 0
         # 屋齡: int
         # e1 高屋齡
@@ -217,7 +217,7 @@ class Classifier:
         e = self.we1*e1 + self.we2*e2 + self.we3*e3
         return e
     
-    def l_living(self, row):
+    def liberty(self, row):
         l = 0
 
         # 與交通站牌距離
@@ -274,7 +274,7 @@ class Classifier:
         l = self.wl1*l1 + self.wl2*l2 + self.wl3*l3
         return l
     
-    def s_safety(self, row):
+    def security(self, row):
         # 土壤液化區
         # 0: 建物非落在土壤液化區
         # 1: 建物落在低潛勢土壤液化區
@@ -304,15 +304,51 @@ class Classifier:
         return s
     
     def apply_class(self, data):
-        data['a'] = data.apply(self.a_ability, axis=1)
-        data['n'] = data.apply(self.n_care, axis=1)
-        data['g'] = data.apply(self.g_economic, axis=1)
-        data['e'] = data.apply(self.e_housing, axis=1)
-        data['l'] = data.apply(self.l_living, axis=1)
-        data['s'] = data.apply(self.s_safety, axis=1)
-        data['score'] = data['a'] + data['n'] + data['g'] + data['e'] + data['l'] + data['s']
+        data['action'] = data.apply(self.action, axis=1)
+        data['nurse'] = data.apply(self.nurse, axis=1)
+        data['gold'] = data.apply(self.gold, axis=1)
+        data['entity'] = data.apply(self.entity, axis=1)
+        data['liberty'] = data.apply(self.liberty, axis=1)
+        data['security'] = data.apply(self.security, axis=1)
+        data['overall'] = data['action'] + data['nurse'] + data['gold'] + data['entity'] + data['liberty'] + data['security']
 
         result = data[['person_sn', 'is_use_long_term_care',
-                       'a', 'n', 'g', 'e', 'l', 's', 'score']]
+                          'action', 'nurse', 'gold', 'entity', 'liberty', 'security', 'overall']]
         print('Classification completed.')
         return result
+
+    def apply_overall(self, data):
+        data['new_overall'] = data['action'] + data['nurse'] + data['gold'] + data['entity'] + data['liberty'] + data['security']
+        result = data[['person_sn', 'is_use_long_term_care',
+                          'action', 'nurse', 'gold', 'entity', 'liberty', 'security', 'overall', 'new_overall']]
+        return result
+    
+    def calcualte(self, data):
+        mean_overall_use_long_term_care = data[data['is_use_long_term_care'] == 1]['overall'].mean()
+        mean_new_overall_use_long_term_care = data[data['is_use_long_term_care'] == 1]['new_overall'].mean()
+        min_overall_use_long_term_care = data[data['is_use_long_term_care'] == 1]['overall'].min()
+        min_new_overall_use_long_term_care = data[data['is_use_long_term_care'] == 1]['new_overall'].min()
+        max_overall_use_long_term_care = data[data['is_use_long_term_care'] == 1]['overall'].max()
+        max_new_overall_use_long_term_care = data[data['is_use_long_term_care'] == 1]['new_overall'].max()
+
+        mean_overall_not_use_long_term_care = data[data['is_use_long_term_care'] == 0]['overall'].mean()
+        mean_new_overall_not_use_long_term_care = data[data['is_use_long_term_care'] == 0]['new_overall'].mean()
+        min_overall_not_use_long_term_care = data[data['is_use_long_term_care'] == 0]['overall'].min()
+        min_new_overall_not_use_long_term_care = data[data['is_use_long_term_care'] == 0]['new_overall'].min()
+        max_overall_use_long_term_care = data[data['is_use_long_term_care'] == 0]['overall'].max()
+        max_new_overall_use_long_term_care = data[data['is_use_long_term_care'] == 0]['new_overall'].max()
+
+
+        print(f"is_use_long_term_care 為 1 時 overall 的平均值: {mean_overall_use_long_term_care}")
+        print(f"is_use_long_term_care 為 1 時 new_overall 的平均值: {mean_new_overall_use_long_term_care}")
+        print(f"is_use_long_term_care 為 1 時 overall 的最小值: {min_overall_use_long_term_care}")
+        print(f"is_use_long_term_care 為 1 時 new_overall 的最小值: {min_new_overall_use_long_term_care}")
+        print(f'is_use_long_term_care 為 1 時 overall 的最大值: {max_overall_use_long_term_care}')
+        print(f'is_use_long_term_care 為 1 時 new_overall 的最大值: {max_new_overall_use_long_term_care}')
+
+        print(f"is_use_long_term_care 為 0 時 overall 的平均值: {mean_overall_not_use_long_term_care}")
+        print(f"is_use_long_term_care 為 0 時 new_overall 的平均值: {mean_new_overall_not_use_long_term_care}")
+        print(f"is_use_long_term_care 為 0 時 overall 的最小值: {min_overall_not_use_long_term_care}")
+        print(f"is_use_long_term_care 為 0 時 new_overall 的最小值: {min_new_overall_not_use_long_term_care}")
+        print(f'is_use_long_term_care 為 0 時 overall 的最大值: {max_overall_use_long_term_care}')
+        print(f'is_use_long_term_care 為 0 時 new_overall 的最大值: {max_new_overall_use_long_term_care}')
