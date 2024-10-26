@@ -42,7 +42,8 @@ Security：
 - 位於淹水潛勢區6種：$`0, \cfrac{0.4}{3}, \cfrac{0.75}{3}, \cfrac{1.5}{3}, \cfrac{2.5}{3}, 1`$
 
 根據乘法原理，總組合數有：
-$$ (36\times 3\times 4)\times(3\times 3\times 2)\times(7\times 3\times 3)\times (21\times 3\times 3)\times (2\times 2\times 2)\times (4\times 2\times 6) = 35,554,111,488$$
+
+$$(36\times 3\times 4)\times(3\times 3\times 2)\times(7\times 3\times 3)\times (21\times 3\times 3)\times (2\times 2\times 2)\times (4\times 2\times 6) = 35,554,111,488$$
 
 因為銀髮安居指數的計算方式是公開的，所以35,554,111,488種組合數透過暴力法推算個體的隱私信息成為可能，特別是許多評分標準的資料可以通過社會工程或實地調查輕易獲得，這大大增加了隱私洩漏的風險。
 
